@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
+#include <gio/gio.h>
 #include "config.c"
+#include "gtk/gtkcssprovider.h"
 
 GtkWidget *createtagbutton(int tagnum) {
   GtkWidget *button;
@@ -10,14 +12,24 @@ GtkWidget *createtagbutton(int tagnum) {
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
   GtkWidget *button_box;
+  GtkCssProvider *cssprovider = gtk_css_provider_new();
+  GtkStyleContext *stylecontext;
+  GFile *cssfile;
   // TODO: Figure out size per monitor
   int window_width = 1920;
   int window_height = 40;
+
+
+  cssfile = g_file_new_for_path(cssfilepath);
+  gtk_css_provider_load_from_file(cssprovider, cssfile , NULL);
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "sgbar");
   gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
   gtk_window_move(GTK_WINDOW(window) , 10, 10);
+
+  stylecontext = gtk_widget_get_style_context(window);
+  gtk_style_context_add_provider(stylecontext, GTK_STYLE_PROVIDER(cssprovider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
   button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_START);
