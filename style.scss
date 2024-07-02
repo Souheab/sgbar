@@ -1,4 +1,7 @@
-$bg: "#303030";
+$bg: #1a1a25;
+$mw: 25px;
+$tag_unsel_col: #5c6a93;
+$tag_unsel_hover: #5c5a63;
 
 * {
   all: unset;
@@ -6,4 +9,22 @@ $bg: "#303030";
 
 window {
   background-color: $bg;
+}
+
+.tagbutton {
+  padding: 0;
+  padding-left: 0;
+  padding-right: 0;
+  min-width: $mw;
+}
+
+.tagbutton:hover label {
+  color: $tag_unsel_hover;
+}
+
+.tagbutton label {
+  color: $tag_unsel_col;
+  padding: 0;
+  font-size: 1.2rem;
+  margin: 0;
 }
