@@ -2,6 +2,7 @@ $bg: #1a1a25;
 $mw: 25px;
 $tag_unsel_col: #5c6a93;
 $tag_unsel_hover: #5c5a63;
+$tag_sel_col: #009fff;
 
 * {
   all: unset;
@@ -27,4 +28,8 @@ window {
   padding: 0;
   font-size: 1.2rem;
   margin: 0;
+}
+
+.tagbutton-active label {
+  color: $tag_sel_col
 }
