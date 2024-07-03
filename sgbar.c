@@ -1,27 +1,13 @@
-#include "config.c"
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <gdk/gdkx.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
+#include "config.h"
+#include "widgets.h"
+#include "x.h"
 
-Display *display;
-Window root_window;
-Atom net_current_desktop_atom;
 GtkWidget *tagbuttons[NUMTAGS];
-
-static GdkFilterReturn x11_event_filter(GdkXEvent *xevent, GdkEvent *event, gpointer data);
-
-GtkWidget *createtagbutton(int tagnum) {
-  GtkWidget *button;
-  GtkStyleContext *stylecontext;
-  button = gtk_button_new_with_label(taglabel);
-  stylecontext = gtk_widget_get_style_context(button);
-  gtk_style_context_add_class(stylecontext, "tagbutton");
-  g_signal_connect(button, "clicked", G_CALLBACK(tagbuttononclick),
-                   GINT_TO_POINTER(tagnum));
-  return button;
-}
 
 void update_tag_buttons(int currenttag) {
   g_print("running update_tag_buttons\n");
@@ -36,55 +22,6 @@ void update_tag_buttons(int currenttag) {
   }
 }
 
-static void setup_x11_event_handling(GtkWidget *widget) {
-  GdkScreen *screen = gtk_widget_get_screen(widget);
-  GdkWindow *root_gdk_window = gdk_screen_get_root_window(screen);
-
-  display = GDK_WINDOW_XDISPLAY(root_gdk_window);
-  root_window = GDK_WINDOW_XID(root_gdk_window);
-
-  if (display == NULL || root_window == 0) {
-    return;
-  }
-
-  net_current_desktop_atom =
-      XInternAtom(display, "_NET_CURRENT_DESKTOP", False);
-
-  gdk_window_add_filter(root_gdk_window, x11_event_filter, NULL);
-
-  XSelectInput(display, root_window, PropertyChangeMask);
-}
-
-static GdkFilterReturn x11_event_filter(GdkXEvent *xevent, GdkEvent *event,
-gpointer data) {
-  XEvent *x11_event = (XEvent *)xevent;
-
-  if (x11_event->type == PropertyNotify) {
-    XPropertyEvent *prop_event = (XPropertyEvent *)x11_event;
-    if (prop_event->atom == net_current_desktop_atom) {
-      Atom actual_type;
-      int actual_format;
-      unsigned long nitems, bytes_after;
-      unsigned char *prop_data = NULL;
-
-      if (XGetWindowProperty(display, root_window, net_current_desktop_atom, 0,
-                             1, False, XA_CARDINAL, &actual_type,
-                             &actual_format, &nitems, &bytes_after,
-                             &prop_data) == Success) {
-        if (prop_data) {
-          long desktop = *(long *)prop_data;
-          g_idle_add((GSourceFunc)update_tag_buttons, GINT_TO_POINTER(desktop));
-          g_print("Current desktop: %lu\n", *((unsigned long *)prop_data));
-          XFree(prop_data);
-        }
-      }
-      return GDK_FILTER_REMOVE;
-    }
-  }
-
-  return GDK_FILTER_CONTINUE;
-}
-
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
   GtkWidget *box;
@@ -96,8 +33,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "sgbar");
   gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
-  g_signal_connect(window, "realize", G_CALLBACK(setup_x11_event_handling), NULL);
-
+  g_signal_connect(window, "realize", G_CALLBACK(setup_x_event_handling), NULL);
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_container_add(GTK_CONTAINER(window), box);
