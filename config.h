@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 #define NUMTAGS 9
 static const char *taglabel = "";
+static const char *volumeicon = "";
 static const char *cssfilepath = "./style.css";
 void tagbuttononclick(GtkWidget *button, gpointer data);
 #endif
