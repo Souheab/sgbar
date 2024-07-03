@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
-#include "sgbar.h"
+#include "widgets.h"
 // Contains X11 related functions
 Display *display;
 Window root_window;

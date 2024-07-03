@@ -7,4 +7,5 @@ extern GtkWidget *tagbuttons[NUMTAGS];
 extern GtkWidget *volume;
 GtkWidget *tag_button_new(int tagnum);
 GtkWidget *metric_new(const gchar* label_text);
+void update_tag_buttons(int currenttag);
 #endif

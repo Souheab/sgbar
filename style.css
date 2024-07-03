@@ -28,4 +28,22 @@ window {
   color: #009fff;
 }
 
+.metricbox label {
+  font-size: 2.2rem;
+}
+
+.metricbox {
+  padding: 5px;
+  margin: 5px;
+}
+
+.metricbox scale trough {
+  all: unset;
+  background-color: #f2b50c;
+  margin-left: 5px;
+  border-radius: 50px;
+  min-height: 8px;
+  min-width: 50px;
+}
+
 /*# sourceMappingURL=style.css.map */
