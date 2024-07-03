@@ -49,11 +49,17 @@ window {
 
 .metricbox scale trough {
   all: unset;
-  background-color: #f2b50c;
+  background-color: gray;
   margin-left: 5px;
   border-radius: 50px;
   min-height: 8px;
   min-width: 50px;
+}
+
+
+.metricbox scale trough highlight {
+  background-color: #f2b50c;
+  border-radius: 50px;
 }
 
 .metric {
