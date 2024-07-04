@@ -47,6 +47,13 @@ void revealer_reveal_with_timeout(GtkWidget *revealer, MetricData *metricdata) {
   gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), TRUE);
 }
 
+static void on_scale_value_changed(GtkRange *range, gpointer data) {
+  if (is_volume_changing()) return;
+
+  gdouble value = gtk_range_get_value(range);
+  set_volume((int) value);
+}
+
 static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event, gpointer data) {
   g_print("hovering over metric\n");
   revealer_reveal_with_timeout(widget, data);
@@ -98,7 +105,11 @@ GtkWidget *metric_new(const gchar *label_text) {
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+
+
   connect_widgets_pa(scale, revealer);
+  g_signal_connect(scale, "value-changed", G_CALLBACK(on_scale_value_changed), NULL);
+
   gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
   gtk_widget_set_size_request(scale, 100, -1);
 
@@ -119,5 +130,6 @@ GtkWidget *metric_new(const gchar *label_text) {
                    G_CALLBACK(metric_on_enter), data);
   g_signal_connect(scaleeventbox, "leave-notify-event",
                    G_CALLBACK(metric_on_leave), data);
+
   return mainbox;
 }

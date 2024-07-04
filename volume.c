@@ -13,6 +13,10 @@ int prev_volume = -1;
 
 static void init_pa();
 
+gboolean is_volume_changing() {
+  return volume_changing;
+}
+
 void connect_widgets_pa(GtkWidget *scale_arg, GtkWidget *revealer_arg) {
   volume_scale = scale_arg;
   revealer = revealer_arg;
@@ -21,6 +25,7 @@ void connect_widgets_pa(GtkWidget *scale_arg, GtkWidget *revealer_arg) {
 
 static gboolean revealer_unreveal_callback(gpointer data) {
   gtk_revealer_set_reveal_child(GTK_REVEALER(data), FALSE);
+  timeout_id = 0;
   return FALSE;
 }
 
@@ -33,6 +38,24 @@ static void update_volume_scale(pa_volume_t volume) {
     g_source_remove(timeout_id);
   timeout_id = g_timeout_add(800, revealer_unreveal_callback, revealer);
   volume_changing = FALSE;
+}
+
+void set_volume(int volume_percent) {
+    if (volume_percent < 0 || volume_percent > 100) {
+        g_print("Volume must be between 0 and 100\n");
+        return;
+    }
+
+    pa_volume_t pa_volume = (pa_volume_t)((double)volume_percent / 100.0 * PA_VOLUME_NORM);
+    pa_cvolume cvolume;
+    pa_cvolume_set(&cvolume, 2, pa_volume);  // Assuming stereo
+
+    pa_operation *op = pa_context_set_sink_volume_by_index(context, 0, &cvolume, NULL, NULL);
+    if (op) {
+        pa_operation_unref(op);
+    } else {
+        g_print("Failed to set volume\n");
+    }
 }
 
 static void sink_info_callback(pa_context *c, const pa_sink_info *i, int eol,
