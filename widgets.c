@@ -6,6 +6,7 @@
 // Contains custom widget stuff
 GtkWidget *tagbuttons[NUMTAGS];
 GtkWidget *volume;
+GtkWidget *brightness;
 
 GtkWidget *tag_button_new(int tagnum) {
   GtkWidget *button;
@@ -58,11 +59,18 @@ GtkWidget *volume_widget_new() {
   return metric_new(label, scale, revealer);
 }
 
+GtkWidget *brightess_widget_new() {
+  GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  GtkWidget *revealer = gtk_revealer_new();
+  GtkWidget *label = gtk_label_new(brightnessicon);
+
+  return metric_new(label, scale, revealer);
+};
+
 
 static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event,
                             gpointer data) {
 
-  g_print("hovering over metric\n");
   MetricData *metricdata = (MetricData*) data;
 
   if (metricdata->timeout_id) {
@@ -76,7 +84,6 @@ static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event,
 static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event,
                             gpointer data) {
   MetricData *metricdata = (MetricData *)data;
-  g_print("leaving metric\n");
 
   if (metricdata->timeout_id == 0) {
     metricdata->timeout_id = g_timeout_add(500, hide_revealer, metricdata);
