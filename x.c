@@ -1,14 +1,14 @@
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-#include <X11/Xatom.h>
 #include "widgets.h"
+#include <X11/Xatom.h>
+#include <gdk/gdkx.h>
+#include <gtk/gtk.h>
 // Contains X11 related functions
 Display *display;
 Window root_window;
 Atom net_current_desktop_atom;
 
 static GdkFilterReturn x_event_filter(GdkXEvent *xevent, GdkEvent *event,
-gpointer data) {
+                                      gpointer data) {
   XEvent *x11_event = (XEvent *)xevent;
 
   if (x11_event->type == PropertyNotify) {
