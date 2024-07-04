@@ -2,20 +2,25 @@
 #include <pulse/glib-mainloop.h>
 #include <pulse/pulseaudio.h>
 
+#define TOOLTIP_FORMAT_STR "Volume: %d%%"
+
 static pa_context *context = NULL;
 static pa_glib_mainloop *glib_mainloop = NULL;
 static pa_mainloop_api *mainloop_api = NULL;
 static gboolean volume_changing = FALSE;
 static GtkWidget *volume_scale = NULL;
 static GtkWidget *revealer = NULL;
+static GtkWidget *label = NULL;
 static guint timeout_id = 0;
+static gboolean first_run = TRUE;
 int prev_volume = -1;
 
 static void init_pa();
 
 gboolean is_volume_changing() { return volume_changing; }
 
-void connect_widgets_pa(GtkWidget *scale_arg, GtkWidget *revealer_arg) {
+void connect_widgets_pa(GtkWidget *label_arg, GtkWidget *scale_arg, GtkWidget *revealer_arg) {
+  label = label_arg;
   volume_scale = scale_arg;
   revealer = revealer_arg;
   init_pa();
@@ -28,14 +33,20 @@ static gboolean revealer_unreveal_callback(gpointer data) {
 }
 
 static void update_volume_scale(pa_volume_t volume) {
-  gdouble volume_percent = (gdouble)volume * 100.0 / PA_VOLUME_NORM;
+  gint volume_percent = volume * 100.0 / PA_VOLUME_NORM;
   volume_changing = TRUE;
   gtk_range_set_value(GTK_RANGE(volume_scale), volume_percent);
-  gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), TRUE);
+  if (!first_run)
+    gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), TRUE);
   if (timeout_id)
     g_source_remove(timeout_id);
   timeout_id = g_timeout_add(800, revealer_unreveal_callback, revealer);
+  GString *str = g_string_new(NULL);
+  char *tooltip_text = g_strdup_printf(TOOLTIP_FORMAT_STR, volume_percent);
+  gtk_widget_set_tooltip_text(label, tooltip_text);
+  g_free(tooltip_text);
   volume_changing = FALSE;
+  first_run = FALSE;
 }
 
 void set_volume(int volume_percent) {
@@ -65,12 +76,10 @@ static void sink_info_callback(pa_context *c, const pa_sink_info *i, int eol,
 
   if (i) {
     pa_volume_t volume = pa_cvolume_avg(&i->volume);
-    if (prev_volume == -1) {
-      prev_volume = volume;
-      return;
-    } else if (prev_volume == volume) {
+    if (prev_volume == volume) {
       return;
     }
+
     update_volume_scale(volume);
     prev_volume = volume;
   }

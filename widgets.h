@@ -10,6 +10,8 @@ typedef struct {
 extern GtkWidget *tagbuttons[NUMTAGS];
 extern GtkWidget *volume;
 GtkWidget *tag_button_new(int tagnum);
-GtkWidget *metric_new(const gchar *label_text);
+GtkWidget *metric_new(GtkWidget* label, GtkWidget* scale, GtkWidget* revealer);
+GtkWidget *volume_widget_new();
 void update_tag_buttons(int currenttag);
+void x_get_display_prop();
 #endif

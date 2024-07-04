@@ -40,7 +40,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(tags_box), button);
   }
 
-  volume = metric_new(volumeicon);
+  volume = volume_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), volume, FALSE, TRUE, 0);
 
   gtk_container_add(GTK_CONTAINER(window), main_box);

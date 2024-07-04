@@ -19,7 +19,6 @@ GtkWidget *tag_button_new(int tagnum) {
 }
 
 void update_tag_buttons(int currenttag) {
-  g_print("running update_tag_buttons\n");
   for (int i = 0; i < NUMTAGS; i++) {
     GtkWidget *button = tagbuttons[i];
     GtkStyleContext *stylecontext = gtk_widget_get_style_context(button);
@@ -31,22 +30,6 @@ void update_tag_buttons(int currenttag) {
   }
 }
 
-static gboolean hide_revealer(gpointer data) {
-  MetricData *metricdata = (MetricData *)data;
-  gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), FALSE);
-  metricdata->timeout_id = 0;
-  return G_SOURCE_REMOVE;
-}
-
-void revealer_reveal_with_timeout(GtkWidget *revealer, MetricData *metricdata) {
-  if (metricdata->timeout_id) {
-    g_source_remove(metricdata->timeout_id);
-    metricdata->timeout_id = 0;
-  }
-
-  gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), TRUE);
-}
-
 static void on_scale_value_changed(GtkRange *range, gpointer data) {
   if (is_volume_changing())
     return;
@@ -55,10 +38,39 @@ static void on_scale_value_changed(GtkRange *range, gpointer data) {
   set_volume((int)value);
 }
 
+
+static gboolean hide_revealer(gpointer data) {
+  MetricData *metricdata = (MetricData *)data;
+  gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), FALSE);
+  metricdata->timeout_id = 0;
+  return G_SOURCE_REMOVE;
+}
+
+GtkWidget *volume_widget_new() {
+  GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  GtkWidget *revealer = gtk_revealer_new();
+  GtkWidget *label = gtk_label_new(volumeicon);
+
+  connect_widgets_pa(label, scale, revealer);
+  g_signal_connect(scale, "value-changed", G_CALLBACK(on_scale_value_changed),
+                   NULL);
+
+  return metric_new(label, scale, revealer);
+}
+
+
 static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event,
                             gpointer data) {
+
   g_print("hovering over metric\n");
-  revealer_reveal_with_timeout(widget, data);
+  MetricData *metricdata = (MetricData*) data;
+
+  if (metricdata->timeout_id) {
+    g_source_remove(metricdata->timeout_id);
+    metricdata->timeout_id = 0;
+  }
+
+  gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), TRUE);
 }
 
 static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event,
@@ -73,14 +85,11 @@ static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event,
 
 static void metric_data_free(gpointer data, GClosure *closure) { g_free(data); }
 
-GtkWidget *metric_new(const gchar *label_text) {
+GtkWidget *metric_new(GtkWidget* label, GtkWidget* scale, GtkWidget* revealer) {
   GtkWidget *mainbox;
   GtkWidget *event_box;
   GtkWidget *scaleeventbox;
   GtkWidget *box;
-  GtkWidget *label;
-  GtkWidget *revealer;
-  GtkWidget *scale;
   GtkStyleContext *stylecontext;
   MetricData *data;
 
@@ -95,8 +104,6 @@ GtkWidget *metric_new(const gchar *label_text) {
   stylecontext = gtk_widget_get_style_context(box);
 
   gtk_style_context_add_class(stylecontext, "metricbox");
-  label = gtk_label_new(label_text);
-  revealer = gtk_revealer_new();
   gtk_revealer_set_transition_type(GTK_REVEALER(revealer),
                                    GTK_REVEALER_TRANSITION_TYPE_SLIDE_RIGHT);
   gtk_revealer_set_transition_duration(GTK_REVEALER(revealer), 500);
@@ -106,11 +113,6 @@ GtkWidget *metric_new(const gchar *label_text) {
   gtk_container_add(GTK_CONTAINER(event_box), box);
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
-
-  connect_widgets_pa(scale, revealer);
-  g_signal_connect(scale, "value-changed", G_CALLBACK(on_scale_value_changed),
-                   NULL);
 
   gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
   gtk_widget_set_size_request(scale, 100, -1);

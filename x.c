@@ -7,6 +7,24 @@ Display *display;
 Window root_window;
 Atom net_current_desktop_atom;
 
+void x_get_display_prop() {
+
+  Atom actual_type;
+  int actual_format;
+  unsigned long nitems, bytes_after;
+  unsigned char *prop_data = NULL;
+
+  if (XGetWindowProperty(display, root_window, net_current_desktop_atom, 0, 1,
+                         False, XA_CARDINAL, &actual_type, &actual_format,
+                         &nitems, &bytes_after, &prop_data) == Success) {
+    if (prop_data) {
+      long desktop = *(long *)prop_data;
+      g_idle_add((GSourceFunc)update_tag_buttons, GINT_TO_POINTER(desktop));
+      XFree(prop_data);
+    }
+  }
+}
+
 static GdkFilterReturn x_event_filter(GdkXEvent *xevent, GdkEvent *event,
                                       gpointer data) {
   XEvent *x11_event = (XEvent *)xevent;
@@ -14,22 +32,7 @@ static GdkFilterReturn x_event_filter(GdkXEvent *xevent, GdkEvent *event,
   if (x11_event->type == PropertyNotify) {
     XPropertyEvent *prop_event = (XPropertyEvent *)x11_event;
     if (prop_event->atom == net_current_desktop_atom) {
-      Atom actual_type;
-      int actual_format;
-      unsigned long nitems, bytes_after;
-      unsigned char *prop_data = NULL;
-
-      if (XGetWindowProperty(display, root_window, net_current_desktop_atom, 0,
-                             1, False, XA_CARDINAL, &actual_type,
-                             &actual_format, &nitems, &bytes_after,
-                             &prop_data) == Success) {
-        if (prop_data) {
-          long desktop = *(long *)prop_data;
-          g_idle_add((GSourceFunc)update_tag_buttons, GINT_TO_POINTER(desktop));
-          g_print("Current desktop: %lu\n", *((unsigned long *)prop_data));
-          XFree(prop_data);
-        }
-      }
+      x_get_display_prop();
       return GDK_FILTER_REMOVE;
     }
   }
@@ -54,4 +57,6 @@ void setup_x_event_handling(GtkWidget *widget) {
   gdk_window_add_filter(root_gdk_window, x_event_filter, NULL);
 
   XSelectInput(display, root_window, PropertyChangeMask);
+
+  x_get_display_prop();
 }
