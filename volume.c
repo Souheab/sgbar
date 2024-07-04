@@ -13,7 +13,7 @@ static GtkWidget *revealer = NULL;
 static GtkWidget *label = NULL;
 static guint timeout_id = 0;
 static gboolean first_run = TRUE;
-int prev_volume = -1;
+static int prev_volume = -1;
 
 static void init_pa();
 
