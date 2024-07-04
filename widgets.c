@@ -1,11 +1,7 @@
 #include "config.h"
-#include <gtk/gtk.h>
 #include "volume.h"
-
-typedef struct {
-  GtkWidget *revealer;
-  guint timeout_id;
-} MetricData;
+#include "widgets.h"
+#include <gtk/gtk.h>
 
 // Contains custom widget stuff
 GtkWidget *tagbuttons[NUMTAGS];
@@ -36,31 +32,34 @@ void update_tag_buttons(int currenttag) {
 }
 
 static gboolean hide_revealer(gpointer data) {
-    MetricData *metricdata = (MetricData *)data;
-    gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), FALSE);
+  MetricData *metricdata = (MetricData *)data;
+  gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), FALSE);
+  metricdata->timeout_id = 0;
+  return G_SOURCE_REMOVE;
+}
+
+void revealer_reveal_with_timeout(GtkWidget *revealer, MetricData *metricdata) {
+  if (metricdata->timeout_id) {
+    g_source_remove(metricdata->timeout_id);
     metricdata->timeout_id = 0;
-    return G_SOURCE_REMOVE;
+  }
+
+  gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), TRUE);
 }
 
 static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event, gpointer data) {
-    MetricData *metricdata = (MetricData *)data;
-    g_print("hovering over metric\n");
-    
-    if (metricdata->timeout_id) {
-        g_source_remove(metricdata->timeout_id);
-        metricdata->timeout_id = 0;
-    }
-    
-    gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), TRUE);
+  g_print("hovering over metric\n");
+  revealer_reveal_with_timeout(widget, data);
 }
 
-static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event, gpointer data) {
-    MetricData *metricdata = (MetricData *)data;
-    g_print("leaving metric\n");
-    
-    if (metricdata->timeout_id == 0) {
-        metricdata->timeout_id = g_timeout_add(500, hide_revealer, metricdata);
-    }
+static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event,
+                            gpointer data) {
+  MetricData *metricdata = (MetricData *)data;
+  g_print("leaving metric\n");
+
+  if (metricdata->timeout_id == 0) {
+    metricdata->timeout_id = g_timeout_add(500, hide_revealer, metricdata);
+  }
 }
 
 static void metric_data_free(gpointer data, GClosure *closure) { g_free(data); }
@@ -99,7 +98,7 @@ GtkWidget *metric_new(const gchar *label_text) {
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
-  connect_scale_pa(scale);
+  connect_widgets_pa(scale, revealer);
   gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
   gtk_widget_set_size_request(scale, 100, -1);
 
@@ -112,9 +111,13 @@ GtkWidget *metric_new(const gchar *label_text) {
   data->revealer = revealer;
   data->timeout_id = 0;
 
-  g_signal_connect_data(event_box, "enter-notify-event", G_CALLBACK(metric_on_enter), data, metric_data_free, 0);
-  g_signal_connect(event_box, "leave-notify-event", G_CALLBACK(metric_on_leave), data);
-  g_signal_connect(scaleeventbox, "enter-notify-event", G_CALLBACK(metric_on_enter), data);
-  g_signal_connect(scaleeventbox, "leave-notify-event", G_CALLBACK(metric_on_leave), data);
+  g_signal_connect_data(event_box, "enter-notify-event",
+                        G_CALLBACK(metric_on_enter), data, metric_data_free, 0);
+  g_signal_connect(event_box, "leave-notify-event", G_CALLBACK(metric_on_leave),
+                   data);
+  g_signal_connect(scaleeventbox, "enter-notify-event",
+                   G_CALLBACK(metric_on_enter), data);
+  g_signal_connect(scaleeventbox, "leave-notify-event",
+                   G_CALLBACK(metric_on_leave), data);
   return mainbox;
 }

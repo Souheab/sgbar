@@ -7,18 +7,31 @@ static pa_glib_mainloop *glib_mainloop = NULL;
 static pa_mainloop_api *mainloop_api = NULL;
 static gboolean volume_changing = FALSE;
 static GtkWidget *volume_scale = NULL;
+static GtkWidget *revealer = NULL;
+static guint timeout_id = 0;
+int prev_volume = -1;
 
 static void init_pa();
 
-void connect_scale_pa(GtkWidget *scale) {
-  volume_scale = scale;
+void connect_widgets_pa(GtkWidget *scale_arg, GtkWidget *revealer_arg) {
+  volume_scale = scale_arg;
+  revealer = revealer_arg;
   init_pa();
 };
+
+static gboolean revealer_unreveal_callback(gpointer data) {
+  gtk_revealer_set_reveal_child(GTK_REVEALER(data), FALSE);
+  return FALSE;
+}
 
 static void update_volume_scale(pa_volume_t volume) {
   gdouble volume_percent = (gdouble)volume * 100.0 / PA_VOLUME_NORM;
   volume_changing = TRUE;
   gtk_range_set_value(GTK_RANGE(volume_scale), volume_percent);
+  gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), TRUE);
+  if (timeout_id)
+    g_source_remove(timeout_id);
+  timeout_id = g_timeout_add(800, revealer_unreveal_callback, revealer);
   volume_changing = FALSE;
 }
 
@@ -28,8 +41,15 @@ static void sink_info_callback(pa_context *c, const pa_sink_info *i, int eol,
     return;
 
   if (i) {
-    pa_volume_t avg_volume = pa_cvolume_avg(&i->volume);
-    update_volume_scale(avg_volume);
+    pa_volume_t volume = pa_cvolume_avg(&i->volume);
+    if (prev_volume == -1) {
+      prev_volume = volume;
+      return;
+    } else if (prev_volume == volume) {
+      return;
+    }
+    update_volume_scale(volume);
+    prev_volume = volume;
   }
 }
 
