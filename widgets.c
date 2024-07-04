@@ -1,5 +1,6 @@
 #include "config.h"
 #include <gtk/gtk.h>
+#include "volume.h"
 
 typedef struct {
   GtkWidget *revealer;
@@ -98,6 +99,7 @@ GtkWidget *metric_new(const gchar *label_text) {
 
   box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  connect_scale_pa(scale);
   gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
   gtk_widget_set_size_request(scale, 100, -1);
 
