@@ -51,6 +51,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
   init_battery(battery);
 
+  // TODO: Improve this code
+  // Maybe initialize all widgets in widgets.c
   init_time_widget();
   gtk_box_pack_end(GTK_BOX(right_box), time_widget, FALSE, TRUE, 0);
 

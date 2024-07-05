@@ -77,7 +77,7 @@ GtkWidget *battery_widget_new() {
   return battery;
 }
 
-static void update_time_widget() {
+static gboolean update_time_widget() {
   time_t rawtime;
   struct tm *timeinfo;
   char buffer[50];
@@ -89,6 +89,8 @@ static void update_time_widget() {
   gtk_label_set_text(GTK_LABEL(time_widget), buffer);
   strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
   gtk_widget_set_tooltip_text(time_widget, buffer);
+
+  return G_SOURCE_CONTINUE;
 }
 
 void init_time_widget() {
