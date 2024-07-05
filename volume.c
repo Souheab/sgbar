@@ -2,7 +2,7 @@
 #include <pulse/glib-mainloop.h>
 #include <pulse/pulseaudio.h>
 
-#define TOOLTIP_FORMAT_STR "Volume: %d%%"
+#define VOLUME_TOOLTIP_FORMAT_STR "Volume: %d%%"
 
 static pa_context *context = NULL;
 static pa_glib_mainloop *glib_mainloop = NULL;
@@ -42,7 +42,7 @@ static void update_volume_scale(pa_volume_t volume) {
     g_source_remove(timeout_id);
   timeout_id = g_timeout_add(800, revealer_unreveal_callback, revealer);
   GString *str = g_string_new(NULL);
-  char *tooltip_text = g_strdup_printf(TOOLTIP_FORMAT_STR, volume_percent);
+  char *tooltip_text = g_strdup_printf(VOLUME_TOOLTIP_FORMAT_STR, volume_percent);
   gtk_widget_set_tooltip_text(label, tooltip_text);
   g_free(tooltip_text);
   volume_changing = FALSE;

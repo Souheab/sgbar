@@ -3,6 +3,7 @@
 #define BATTERY_PATH "/sys/class/power_supply/BAT0/"
 #define BATTERY_CAPACITY_PATH BATTERY_PATH "/capacity"
 #define BATTERY_STATUS_PATH BATTERY_PATH "/status"
+#define BATTERY_TOOLTIP_FORMAT_STR "Battery: %d%% (%s)"
 
 GFile *capacity_file;
 GFile *status_file;
@@ -50,6 +51,9 @@ static void update_battery_widget() {
 
   gtk_image_set_from_icon_name(GTK_IMAGE(battery_widget), icon_name,
                                GTK_ICON_SIZE_MENU);
+
+  char* tooltip_text = g_strdup_printf(BATTERY_TOOLTIP_FORMAT_STR, capacity, status);
+  gtk_widget_set_tooltip_text(battery_widget, tooltip_text);
 }
 
 void init_battery(GtkWidget *battery_widget_arg) {
