@@ -51,6 +51,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
   init_battery(battery);
 
+  init_time_widget();
+  gtk_box_pack_end(GTK_BOX(right_box), time_widget, FALSE, TRUE, 0);
+
   gtk_container_add(GTK_CONTAINER(window), main_box);
 
   gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);

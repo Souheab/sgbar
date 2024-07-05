@@ -2,12 +2,14 @@
 #include "config.h"
 #include "volume.h"
 #include <gtk/gtk.h>
+#include <time.h>
 
 // Contains custom widget stuff
 GtkWidget *tagbuttons[NUMTAGS];
 GtkWidget *volume;
 GtkWidget *brightness;
 GtkWidget *battery;
+GtkWidget *time_widget;
 
 GtkWidget *tag_button_new(int tagnum) {
   GtkWidget *button;
@@ -72,6 +74,26 @@ GtkWidget *brightess_widget_new() {
 GtkWidget *battery_widget_new() {
   GtkWidget *battery = gtk_image_new();
 
+  return battery;
+}
+
+static void update_time_widget() {
+  time_t rawtime;
+  struct tm *timeinfo;
+  char buffer[50];
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(buffer, sizeof(buffer), "%H\n%M", timeinfo);
+  gtk_label_set_text(GTK_LABEL(time_widget), buffer);
+  strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
+  gtk_widget_set_tooltip_text(time_widget, buffer);
+}
+
+void init_time_widget() {
+  time_widget = gtk_label_new(NULL);
+  g_timeout_add_seconds(1, (GSourceFunc)update_time_widget, NULL);
 }
 
 static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event,
@@ -141,10 +163,13 @@ GtkWidget *metric_new(GtkWidget *label, GtkWidget *scale, GtkWidget *revealer) {
 
   g_signal_connect_data(event_box, "enter-notify-event",
                         G_CALLBACK(metric_on_enter), data, metric_data_free, 0);
+
   g_signal_connect(event_box, "leave-notify-event", G_CALLBACK(metric_on_leave),
                    data);
+
   g_signal_connect(scaleeventbox, "enter-notify-event",
                    G_CALLBACK(metric_on_enter), data);
+
   g_signal_connect(scaleeventbox, "leave-notify-event",
                    G_CALLBACK(metric_on_leave), data);
 

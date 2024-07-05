@@ -11,11 +11,13 @@ extern GtkWidget *tagbuttons[NUMTAGS];
 extern GtkWidget *volume;
 extern GtkWidget *brightness;
 extern GtkWidget *battery;
+extern GtkWidget *time_widget;
 GtkWidget *tag_button_new(int tagnum);
 GtkWidget *metric_new(GtkWidget* label, GtkWidget* scale, GtkWidget* revealer);
 GtkWidget *volume_widget_new();    
 GtkWidget *brightess_widget_new();
 GtkWidget *battery_widget_new();
+void init_time_widget();
 void update_tag_buttons(int currenttag);
 void x_get_display_prop();
 #endif
