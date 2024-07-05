@@ -7,6 +7,7 @@
 GtkWidget *tagbuttons[NUMTAGS];
 GtkWidget *volume;
 GtkWidget *brightness;
+GtkWidget *battery;
 
 GtkWidget *tag_button_new(int tagnum) {
   GtkWidget *button;
@@ -39,7 +40,6 @@ static void on_scale_value_changed(GtkRange *range, gpointer data) {
   set_volume((int)value);
 }
 
-
 static gboolean hide_revealer(gpointer data) {
   MetricData *metricdata = (MetricData *)data;
   gtk_revealer_set_reveal_child(GTK_REVEALER(metricdata->revealer), FALSE);
@@ -48,7 +48,8 @@ static gboolean hide_revealer(gpointer data) {
 }
 
 GtkWidget *volume_widget_new() {
-  GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  GtkWidget *scale =
+      gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
   GtkWidget *revealer = gtk_revealer_new();
   GtkWidget *label = gtk_label_new(volumeicon);
 
@@ -60,18 +61,23 @@ GtkWidget *volume_widget_new() {
 }
 
 GtkWidget *brightess_widget_new() {
-  GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  GtkWidget *scale =
+      gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
   GtkWidget *revealer = gtk_revealer_new();
   GtkWidget *label = gtk_label_new(brightnessicon);
 
   return metric_new(label, scale, revealer);
 };
 
+GtkWidget *battery_widget_new() {
+  GtkWidget *battery = gtk_image_new();
+
+}
 
 static void metric_on_enter(GtkWidget *widget, GdkEventCrossing *event,
                             gpointer data) {
 
-  MetricData *metricdata = (MetricData*) data;
+  MetricData *metricdata = (MetricData *)data;
 
   if (metricdata->timeout_id) {
     g_source_remove(metricdata->timeout_id);
@@ -92,7 +98,7 @@ static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event,
 
 static void metric_data_free(gpointer data, GClosure *closure) { g_free(data); }
 
-GtkWidget *metric_new(GtkWidget* label, GtkWidget* scale, GtkWidget* revealer) {
+GtkWidget *metric_new(GtkWidget *label, GtkWidget *scale, GtkWidget *revealer) {
   GtkWidget *mainbox;
   GtkWidget *event_box;
   GtkWidget *scaleeventbox;

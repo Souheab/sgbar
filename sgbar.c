@@ -6,6 +6,7 @@
 #include <gdk/gdkx.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
+#include "battery.h"
 // Custom widgets are declared in widgets.h
 
 static void activate(GtkApplication *app, gpointer user_data) {
@@ -46,6 +47,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
   brightness = brightess_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), brightness, FALSE, TRUE, 0);
 
+  battery = battery_widget_new();
+  gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
+  init_battery(battery);
+
   gtk_container_add(GTK_CONTAINER(window), main_box);
 
   gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);
@@ -53,7 +58,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
   GdkWindow *gdk_window = gtk_widget_get_window(window);
 
-  if (gdk_window) {
+  if (gdk_window != NULL) {
     gdk_window_set_override_redirect(gdk_window, TRUE);
     gdk_window_show(gdk_window);
     gdk_window_move(gdk_window, 0, 30);
