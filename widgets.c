@@ -23,16 +23,25 @@ GtkWidget *tag_button_new(int tagnum) {
   return button;
 }
 
-void update_tag_buttons(int currenttag) {
+gboolean
+istagselected(int tagnum, int tagmask) {
+  if (tagnum >= NUMTAGS)
+    return FALSE;
+
+  return (tagmask & (1 << tagnum)) != 0;
+}
+
+gboolean update_tag_buttons(int tagmask) {
   for (int i = 0; i < NUMTAGS; i++) {
     GtkWidget *button = tagbuttons[i];
     GtkStyleContext *stylecontext = gtk_widget_get_style_context(button);
-    if (i == currenttag) {
+    if (istagselected(i, tagmask)) {
       gtk_style_context_add_class(stylecontext, "tagbutton-active");
     } else {
       gtk_style_context_remove_class(stylecontext, "tagbutton-active");
     }
   }
+  return G_SOURCE_REMOVE;
 }
 
 static void on_scale_value_changed(GtkRange *range, gpointer data) {

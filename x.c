@@ -2,24 +2,26 @@
 #include <X11/Xatom.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
+#include <limits.h>
 // Contains X11 related functions
 Display *display;
 Window root_window;
-Atom net_current_desktop_atom;
+Atom dwm_tag_mask_atom;
+Atom utf8string;
 
-void x_get_display_prop() {
+void x_handle_events() {
 
   Atom actual_type;
   int actual_format;
   unsigned long nitems, bytes_after;
   unsigned char *prop_data = NULL;
 
-  if (XGetWindowProperty(display, root_window, net_current_desktop_atom, 0, 1,
-                         False, XA_CARDINAL, &actual_type, &actual_format,
+  if (XGetWindowProperty(display, root_window, dwm_tag_mask_atom, 0, LONG_MAX,
+                         False, utf8string, &actual_type, &actual_format,
                          &nitems, &bytes_after, &prop_data) == Success) {
     if (prop_data) {
-      long desktop = *(long *)prop_data;
-      g_idle_add((GSourceFunc)update_tag_buttons, GINT_TO_POINTER(desktop));
+      int tagmask = atoi((char*)prop_data);
+      g_idle_add((GSourceFunc)update_tag_buttons, GINT_TO_POINTER(tagmask));
       XFree(prop_data);
     }
   }
@@ -31,8 +33,8 @@ static GdkFilterReturn x_event_filter(GdkXEvent *xevent, GdkEvent *event,
 
   if (x11_event->type == PropertyNotify) {
     XPropertyEvent *prop_event = (XPropertyEvent *)x11_event;
-    if (prop_event->atom == net_current_desktop_atom) {
-      x_get_display_prop();
+    if (prop_event->atom == dwm_tag_mask_atom) {
+      x_handle_events();
       return GDK_FILTER_REMOVE;
     }
   }
@@ -51,12 +53,12 @@ void setup_x_event_handling(GtkWidget *widget) {
     return;
   }
 
-  net_current_desktop_atom =
-      XInternAtom(display, "_NET_CURRENT_DESKTOP", False);
-
-  gdk_window_add_filter(root_gdk_window, x_event_filter, NULL);
+  dwm_tag_mask_atom = XInternAtom(display, "DWM_TAG_MASK", False);
+	utf8string = XInternAtom(display, "UTF8_STRING", False);
 
   XSelectInput(display, root_window, PropertyChangeMask);
+  gdk_window_add_filter(root_gdk_window, x_event_filter, NULL);
 
-  x_get_display_prop();
+
+  x_handle_events();
 }

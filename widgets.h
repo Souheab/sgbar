@@ -19,6 +19,6 @@ GtkWidget *volume_widget_new();
 GtkWidget *brightess_widget_new();
 GtkWidget *battery_widget_new();
 void init_time_widget();
-void update_tag_buttons(int currenttag);
-void x_get_display_prop();
+gboolean update_tag_buttons(int currenttag);
+void x_handle_events();
 #endif
