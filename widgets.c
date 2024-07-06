@@ -50,6 +50,15 @@ static gboolean hide_revealer(gpointer data) {
   return G_SOURCE_REMOVE;
 }
 
+GtkWidget *tags_box_new() {
+  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  for (int i = 0; i < NUMTAGS; i++) {
+    tagbuttons[i] = tag_button_new(i);
+    gtk_container_add(GTK_CONTAINER(box), tagbuttons[i]);
+  }
+  return box;
+}
+
 GtkWidget *volume_widget_new() {
   GtkWidget *scale =
       gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);

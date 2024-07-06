@@ -26,20 +26,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
   g_signal_connect(window, "realize", G_CALLBACK(setup_x_event_handling), NULL);
 
   main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  tags_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   left_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   right_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
   gtk_box_pack_start(GTK_BOX(main_box), left_box, TRUE, TRUE, 0);
   gtk_box_pack_end(GTK_BOX(main_box), right_box, TRUE, TRUE, 0);
 
+  tags_box = tags_box_new();
   gtk_box_pack_start(GTK_BOX(left_box), tags_box, TRUE, TRUE, 0);
 
-  for (int i = 0; i < NUMTAGS; i++) {
-    GtkWidget *button = tag_button_new(i);
-    tagbuttons[i] = button;
-    gtk_container_add(GTK_CONTAINER(tags_box), button);
-  }
 
   volume = volume_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), volume, FALSE, TRUE, 0);

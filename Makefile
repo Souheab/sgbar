@@ -15,6 +15,9 @@ all: sgbar
 sgbar: $(OBJS)
 	$(CC) -o $(@F) $(OBJS) $(LIBS)
 
+debug: CFLAGS += -DDEBUG -g
+debug: sgbar
+
 clean:
 	rm -f $(OBJS)
 	rm -f sgbar

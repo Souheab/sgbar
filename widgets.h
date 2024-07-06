@@ -14,6 +14,7 @@ extern GtkWidget *battery;
 extern GtkWidget *time_widget;
 GtkWidget *tag_button_new(int tagnum);
 GtkWidget *metric_new(GtkWidget* label, GtkWidget* scale, GtkWidget* revealer);
+GtkWidget *tags_box_new();
 GtkWidget *volume_widget_new();    
 GtkWidget *brightess_widget_new();
 GtkWidget *battery_widget_new();
