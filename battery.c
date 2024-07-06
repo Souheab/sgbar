@@ -1,17 +1,18 @@
 #include <gtk/gtk.h>
 
 #define BATTERY_PATH "/sys/class/power_supply/BAT0/"
-#define BATTERY_CAPACITY_PATH BATTERY_PATH "/capacity"
-#define BATTERY_STATUS_PATH BATTERY_PATH "/status"
+#define BATTERY_CAPACITY_PATH BATTERY_PATH "capacity"
+#define BATTERY_STATUS_PATH BATTERY_PATH "status"
 #define BATTERY_TOOLTIP_FORMAT_STR "Battery: %d%% (%s)"
 
-GFile *capacity_file;
-GFile *status_file;
-GFileMonitor *capacity_monitor;
-GFileMonitor *status_monitor;
-GtkWidget *battery_widget;
+static GFile *capacity_file;
+static GFile *status_file;
+static GFileMonitor *capacity_monitor;
+static GFileMonitor *status_monitor;
+static GtkWidget *battery_widget;
 
-static void update_battery_widget() {
+static gboolean update_battery_widget() {
+  g_print("update ran");
   char *capacity_contents = NULL, *status_contents = NULL;
   gsize capacity_length, status_length;
   int capacity;
@@ -54,19 +55,43 @@ static void update_battery_widget() {
 
   char* tooltip_text = g_strdup_printf(BATTERY_TOOLTIP_FORMAT_STR, capacity, status);
   gtk_widget_set_tooltip_text(battery_widget, tooltip_text);
+  return G_SOURCE_CONTINUE;
+}
+
+gboolean testhai() {
+  g_print("testhai\n");
+  return G_SOURCE_CONTINUE;
 }
 
 void init_battery(GtkWidget *battery_widget_arg) {
   capacity_file = g_file_new_for_path(BATTERY_CAPACITY_PATH);
   status_file = g_file_new_for_path(BATTERY_STATUS_PATH);
+  battery_widget = battery_widget_arg;
+  g_print(BATTERY_STATUS_PATH"\n");
   capacity_monitor =
       g_file_monitor_file(capacity_file, G_FILE_MONITOR_NONE, NULL, NULL);
   status_monitor =
       g_file_monitor_file(status_file, G_FILE_MONITOR_NONE, NULL, NULL);
-  g_signal_connect(capacity_monitor, "changed",
-                   G_CALLBACK(update_battery_widget), NULL);
-  g_signal_connect(status_monitor, "changed", G_CALLBACK(update_battery_widget),
-                   NULL);
-  battery_widget = battery_widget_arg;
   update_battery_widget();
+
+  if (!capacity_monitor || !status_monitor) {
+    g_print("Failed to set up file monitors\n");
+    return;
+  }
+
+  char *capacity_contents = NULL, *status_contents = NULL;
+  gsize capacity_length, status_length;
+  int capacity;
+  char status[20];
+  char buffer[50];
+
+  g_file_load_contents(status_file, NULL, &capacity_contents,
+                       &capacity_length, NULL, NULL);
+  g_print("capacity_contents: %s\n", capacity_contents);
+  //fallback timeout :|, the monitor doesn't work
+  // TODO IMPORTANT: Fix this
+  // Unfortunately from what i see we can't seem to monitor brightness maybe since it's managed by the kernel
+  guint a = g_timeout_add_seconds(5, (GSourceFunc)update_battery_widget, NULL);
+  printf("timeout id: %d\n", a);
+    // Handle error
 }

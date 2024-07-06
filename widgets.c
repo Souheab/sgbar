@@ -1,4 +1,5 @@
 #include "widgets.h"
+#include "battery.h"
 #include "config.h"
 #include "volume.h"
 #include "brightness.h"
@@ -31,7 +32,7 @@ istagselected(int tagnum, int tagmask) {
   return (tagmask & (1 << tagnum)) != 0;
 }
 
-gboolean update_tag_buttons(int tagmask) {
+gboolean update_active_tag_buttons(int tagmask) {
   for (int i = 0; i < NUMTAGS; i++) {
     GtkWidget *button = tagbuttons[i];
     GtkStyleContext *stylecontext = gtk_widget_get_style_context(button);
@@ -39,6 +40,20 @@ gboolean update_tag_buttons(int tagmask) {
       gtk_style_context_add_class(stylecontext, "tagbutton-active");
     } else {
       gtk_style_context_remove_class(stylecontext, "tagbutton-active");
+    }
+  }
+  return G_SOURCE_REMOVE;
+}
+
+gboolean update_occupied_tag_buttons(int tagmask) {
+  printf("update_occupied_tag_buttons\n");
+  for (int i = 0; i < NUMTAGS; i++) {
+    GtkWidget *button = tagbuttons[i];
+    GtkStyleContext *stylecontext = gtk_widget_get_style_context(button);
+    if (istagselected(i, tagmask)) {
+      gtk_style_context_add_class(stylecontext, "tagbutton-occupied");
+    } else {
+      gtk_style_context_remove_class(stylecontext, "tagbutton-occupied");
     }
   }
   return G_SOURCE_REMOVE;
@@ -94,7 +109,7 @@ GtkWidget *brightess_widget_new() {
 
 GtkWidget *battery_widget_new() {
   GtkWidget *battery = gtk_image_new();
-
+  init_battery(battery);
   return battery;
 }
 

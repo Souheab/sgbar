@@ -24,6 +24,10 @@ window {
   margin: 0;
 }
 
+.tagbutton-occupied label {
+  color: #5e72cc;
+}
+
 .tagbutton-active label {
   color: #009fff;
 }

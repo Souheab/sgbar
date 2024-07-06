@@ -6,6 +6,6 @@
 static const char *taglabel = "";
 static const char *volumeicon = "";
 static const char *brightnessicon = "";
-static const char *cssfilepath = "./style.css";
+static const char *cssfilepath = "/usr/local/share/sgbar/style.css";
 void tagbuttononclick(GtkWidget *button, gpointer data);
 #endif
