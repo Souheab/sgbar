@@ -1,6 +1,7 @@
 #include "widgets.h"
 #include "config.h"
 #include "volume.h"
+#include "brightness.h"
 #include <gtk/gtk.h>
 #include <time.h>
 
@@ -67,6 +68,8 @@ GtkWidget *brightess_widget_new() {
       gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
   GtkWidget *revealer = gtk_revealer_new();
   GtkWidget *label = gtk_label_new(brightnessicon);
+
+  init_brightness(label, scale, revealer);
 
   return metric_new(label, scale, revealer);
 };
