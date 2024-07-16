@@ -4,7 +4,7 @@
 static NMClient *client;
 static gboolean client_initialized = FALSE;
 
-gchar *get_strength_icon_name(guint8 strength) {
+static gchar *get_strength_icon_name(guint8 strength) {
   if (strength > 80)
     return "network-wireless-signal-excellent-symbolic";
   else if (strength > 55)
@@ -123,7 +123,7 @@ static void wifi_button_on_click(GtkWidget *widget, gpointer data) {
   gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
 }
 
-void update_wifi_button(GtkWidget *button, gpointer data){
+static void update_wifi_button(GtkWidget *button, gpointer data){
   const GPtrArray *devices = nm_client_get_devices(client);
   gboolean is_connected = FALSE;
   guint8 strength = 0;

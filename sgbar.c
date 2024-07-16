@@ -6,7 +6,10 @@
 #include <gdk/gdkx.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
-// Custom widgets are declared in widgets.h
+#include "network.h"
+
+// TODO: organize the widgets consistently
+GtkWidget *wifi_button;
 
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
@@ -43,6 +46,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
   battery = battery_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
+
+  wifi_button = new_wifi_button();
+  gtk_box_pack_end(GTK_BOX(right_box), wifi_button, FALSE, TRUE, 0);
 
 
   // TODO: Improve this code
