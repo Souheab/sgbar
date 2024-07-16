@@ -146,7 +146,7 @@ static void update_wifi_button(GtkWidget *button, gpointer data){
   gtk_button_set_image(GTK_BUTTON(button), image);
 }
 
-GtkWidget *new_wifi_button() {
+GtkWidget *wifi_button_new() {
   if (!client_initialized) {
     init_nm_client();
   }

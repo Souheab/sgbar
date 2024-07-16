@@ -3,10 +3,6 @@
 
 #include "config.h"
 #include <gtk/gtk.h>
-typedef struct {
-  GtkWidget *revealer;
-  guint timeout_id;
-} MetricData;
 extern GtkWidget *tagbuttons[NUMTAGS];
 extern GtkWidget *volume;
 extern GtkWidget *brightness;

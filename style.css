@@ -2,6 +2,21 @@
   all: unset;
 }
 
+menu {
+  background: #3a3a45;
+}
+
+menuitem {
+  padding: 5px;
+  margin: 5px;
+}
+
+menuitem:insensitive {
+  color: #999999;
+  padding: 0px;
+  font-size: 0.8rem;
+}
+
 window {
   background-color: #1a1a25;
 }

@@ -47,7 +47,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   battery = battery_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
 
-  wifi_button = new_wifi_button();
+  wifi_button = wifi_button_new();
   gtk_box_pack_end(GTK_BOX(right_box), wifi_button, FALSE, TRUE, 0);
 
 

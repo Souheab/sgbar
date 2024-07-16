@@ -121,3 +121,6 @@ static void init_pa() {
   pa_context_set_state_callback(context, context_state_callback, NULL);
   pa_context_connect(context, NULL, 0, NULL);
 }
+
+/* GtkWidget *volume_scale_new() { */
+/* } */
