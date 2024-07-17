@@ -140,5 +140,5 @@ GtkWidget *volume_widget_new() {
   volume_label = gtk_label_new(volumeicon);
   init_pa();
   g_signal_connect(volume_scale, "value-changed", G_CALLBACK(on_volume_scale_value_changed), NULL);
-  return metric_new(volume_label, volume_scale, volume_revealer);
+  return metric_new(volume_label, volume_scale, volume_revealer)->metric_widget;
 }

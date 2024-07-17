@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include "metric.h"
 typedef struct {
   GtkWidget *revealer;
   guint timeout_id;
@@ -35,7 +36,7 @@ static void metric_on_leave(GtkWidget *widget, GdkEventCrossing *event,
   }
 }
 
-GtkWidget *metric_new(GtkWidget *label, GtkWidget *scale, GtkWidget *revealer) {
+Metric *metric_new(GtkWidget *label, GtkWidget *scale, GtkWidget *revealer) {
   GtkWidget *mainbox;
   GtkWidget *event_box;
   GtkWidget *scaleeventbox;
@@ -88,5 +89,10 @@ GtkWidget *metric_new(GtkWidget *label, GtkWidget *scale, GtkWidget *revealer) {
   g_signal_connect(scaleeventbox, "leave-notify-event",
                    G_CALLBACK(metric_on_leave), data);
 
-  return mainbox;
+  Metric *metric = g_new(Metric, 1);
+  metric->metric_widget = mainbox;
+  metric->revealer = revealer;
+  metric->scale = scale;
+  metric->label = label;
+  return metric;
 }

@@ -50,7 +50,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   volume = volume_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), volume, FALSE, TRUE, 0);
 
-  brightness = brightess_widget_new();
+  brightness = brightness_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), brightness, FALSE, TRUE, 0);
 
   battery = battery_widget_new();

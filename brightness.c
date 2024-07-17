@@ -6,19 +6,17 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "config.h"
+#include "gio/gio.h"
 #include "metric.h"
 
 #define BACKLIGHT_PATH "/sys/class/backlight"
 #define BRIGHTNESS_TOOLTIP_FORMAT_STR "Brightness: %d%%"
-static GtkWidget *brightness_scale;
-static GtkWidget *brightness_label;
-static GtkWidget *brightness_revealer;
 static GFile *brightness_file;
 static GFileMonitor *brightness_monitor;
 static int max_brightness;
 static guint timeout_id;
-static gboolean first_run = TRUE;
 static gboolean brightness_changing = FALSE;
+static gboolean brightness_initialized = FALSE;
 
 char *find_backlight_device() {
   DIR *dir;
@@ -69,8 +67,7 @@ static void set_brightness(int value) {
   gboolean result = (bytes_written != -1 && close_result == 0);
 
   if (!result) {
-    g_warning("Failed to write to file: %s (errno: %d, %s)", file_path, errno,
-              strerror(errno));
+    g_warning("Failed to write to file: %s (errno: %d, %s)", file_path, errno, strerror(errno));
   }
 
   g_free(contents);
@@ -104,29 +101,29 @@ static gboolean revealer_unreveal_callback(gpointer data) {
   return FALSE;
 }
 
-static void update_brightness_widget() {
+
+static void
+update_brightness_widget(Metric *metric) {
   printf("Updating brightness widget\n");
   char *contents;
-  if (!g_file_load_contents(brightness_file, NULL, &contents, NULL, NULL,
-                            NULL)) {
+  if (!g_file_load_contents(brightness_file, NULL, &contents, NULL, NULL, NULL)) {
     g_print("Cannot read brightness file\n");
     return;
   }
+
   int brightness = atoi(contents);
   int percentage = ((double)brightness / max_brightness) * 100;
-  gtk_range_set_value(GTK_RANGE(brightness_scale), percentage);
-  if (!first_run)
-    gtk_revealer_set_reveal_child(GTK_REVEALER(brightness_revealer), TRUE);
+  gtk_range_set_value(GTK_RANGE(metric->scale), percentage);
+
   if (timeout_id)
     g_source_remove(timeout_id);
-  timeout_id =
-      g_timeout_add(800, revealer_unreveal_callback, brightness_revealer);
+
+  timeout_id = g_timeout_add(800, revealer_unreveal_callback, metric->revealer);
   GString *str = g_string_new(NULL);
   char *tooltip_text =
       g_strdup_printf(BRIGHTNESS_TOOLTIP_FORMAT_STR, percentage);
-  gtk_widget_set_tooltip_text(brightness_label, tooltip_text);
+  gtk_widget_set_tooltip_text(metric->label, tooltip_text);
   g_free(tooltip_text);
-  first_run = FALSE;
 }
 
 static void on_brightness_scale_changed(GtkWidget *widget, gpointer data) {
@@ -137,11 +134,16 @@ static void on_brightness_scale_changed(GtkWidget *widget, gpointer data) {
   set_brightness(brightness);
 }
 
-static void init_brightness(GtkWidget *label_widget, GtkWidget *scale_widget,
-                     GtkWidget *revealer_widget) {
-  brightness_scale = scale_widget;
-  brightness_label = label_widget;
-  brightness_revealer = revealer_widget;
+static void
+on_brightness_file_changed(GFileMonitor *monitor, GFile *file,
+                           GFile *other_file,
+                           GFileMonitorEvent event_type,
+                           gpointer user_data) {
+  Metric *metric = (Metric *) user_data;
+  update_brightness_widget(metric);
+}
+
+static void init_brightness() {
   char *device_path = find_backlight_device();
   if (device_path == NULL) {
     g_print("Cannot find backlight device\n");
@@ -159,23 +161,25 @@ static void init_brightness(GtkWidget *label_widget, GtkWidget *scale_widget,
   GFile *max_brightness_file = g_file_new_for_path(max_brightness_file_path);
   max_brightness = read_value(device_path, "max_brightness");
   g_free(max_brightness_file_path);
+  brightness_initialized = TRUE;
+}
 
-  update_brightness_widget();
+GtkWidget *brightness_widget_new() {
+  GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  GtkWidget *revealer = gtk_revealer_new();
+  GtkWidget *label = gtk_label_new(brightnessicon);
+
+  Metric *metric = metric_new(label, scale, revealer);
+
+  if (!brightness_initialized)
+    init_brightness();
+
+  update_brightness_widget(metric);
 
   g_signal_connect(brightness_monitor, "changed",
                    G_CALLBACK(update_brightness_widget), NULL);
-  g_signal_connect(brightness_scale, "value-changed",
+  g_signal_connect(metric->scale, "value-changed",
                    G_CALLBACK(on_brightness_scale_changed), NULL);
+
+  return metric->metric_widget;
 }
-
-
-GtkWidget *brightess_widget_new() {
-  brightness_scale =
-      gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
-  brightness_revealer = gtk_revealer_new();
-  brightness_label = gtk_label_new(brightnessicon);
-
-  init_brightness(brightness_label, brightness_scale, brightness_revealer);
-
-  return metric_new(brightness_label, brightness_scale, brightness_revealer);
-};

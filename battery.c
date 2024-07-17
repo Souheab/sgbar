@@ -9,9 +9,10 @@ static GFile *capacity_file;
 static GFile *status_file;
 static GFileMonitor *capacity_monitor;
 static GFileMonitor *status_monitor;
-static GtkWidget *battery_widget;
+static gboolean battery_module_initialized = FALSE;
 
-static gboolean update_battery_widget() {
+static gboolean update_battery_widget(gpointer data) {
+  GtkWidget *battery_widget = (GtkWidget *) data;
   char *capacity_contents = NULL, *status_contents = NULL;
   gsize capacity_length, status_length;
   int capacity;
@@ -57,16 +58,14 @@ static gboolean update_battery_widget() {
   return G_SOURCE_CONTINUE;
 }
 
-static void init_battery(GtkWidget *battery_widget_arg) {
+static void init_battery() {
   capacity_file = g_file_new_for_path(BATTERY_CAPACITY_PATH);
   status_file = g_file_new_for_path(BATTERY_STATUS_PATH);
-  battery_widget = battery_widget_arg;
   g_print(BATTERY_STATUS_PATH"\n");
   capacity_monitor =
       g_file_monitor_file(capacity_file, G_FILE_MONITOR_NONE, NULL, NULL);
   status_monitor =
       g_file_monitor_file(status_file, G_FILE_MONITOR_NONE, NULL, NULL);
-  update_battery_widget();
 
   if (!capacity_monitor || !status_monitor) {
     g_print("Failed to set up file monitors\n");
@@ -82,15 +81,19 @@ static void init_battery(GtkWidget *battery_widget_arg) {
   g_file_load_contents(status_file, NULL, &capacity_contents,
                        &capacity_length, NULL, NULL);
   g_print("capacity_contents: %s\n", capacity_contents);
-  // Unfortunately from what i see we can't seem to monitor battery maybe since it's managed by the kernel
-  // TODO: Update, maybe we can acpi to monitor
-  guint a = g_timeout_add_seconds(5, (GSourceFunc)update_battery_widget, NULL);
-  printf("timeout id: %d\n", a);
-    // Handle error
+  battery_module_initialized = TRUE;
 }
 
 GtkWidget *battery_widget_new() {
   GtkWidget *battery = gtk_image_new();
-  init_battery(battery);
+  if (!battery_module_initialized)
+    init_battery();
+
+  update_battery_widget(battery);
+
+  // Unfortunately from what i see we can't seem to monitor battery maybe since it's managed by the kernel
+  // TODO: Update, maybe we can acpi to monitor
+  g_timeout_add_seconds(5, (GSourceFunc)update_battery_widget, battery);
+
   return battery;
 }
