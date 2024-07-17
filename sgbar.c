@@ -1,15 +1,16 @@
 #include "config.h"
-#include "widgets.h"
+#include "network.h"
+#include "volume.h"
+#include "battery.h"
+#include "brightness.h"
 #include "x.h"
+#include "clock.h"
+#include "tags.h"
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <gdk/gdkx.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
-#include "network.h"
-
-// TODO: organize the widgets consistently
-GtkWidget *wifi_button;
 
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
@@ -17,6 +18,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *main_box;
   GtkWidget *left_box;
   GtkWidget *right_box;
+
+  // Widgets:
+  GtkWidget *tags_box_widget;
+  GtkWidget *wifi_button;
+  GtkWidget *volume;
+  GtkWidget *brightness;
+  GtkWidget *battery;
+  GtkWidget *clock_widget;
+
   // TODO: Figure out size based on current monitor
   // Maybe also create window for each monitor
   int window_width = 1920;
@@ -37,7 +47,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
   tags_box = tags_box_new();
   gtk_box_pack_start(GTK_BOX(left_box), tags_box, TRUE, TRUE, 0);
 
-
   volume = volume_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), volume, FALSE, TRUE, 0);
 
@@ -51,10 +60,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gtk_box_pack_end(GTK_BOX(right_box), wifi_button, FALSE, TRUE, 0);
 
 
-  // TODO: Improve this code
-  // Maybe initialize all widgets in widgets.c
-  init_time_widget();
-  gtk_box_pack_end(GTK_BOX(right_box), time_widget, FALSE, TRUE, 0);
+  clock_widget = clock_widget_new();
+  gtk_box_pack_end(GTK_BOX(right_box), clock_widget, FALSE, TRUE, 0);
 
   gtk_container_add(GTK_CONTAINER(window), main_box);
 

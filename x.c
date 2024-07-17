@@ -1,4 +1,4 @@
-#include "widgets.h"
+#include "tags.h"
 #include <X11/Xatom.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>

@@ -11,7 +11,7 @@ menuitem {
   margin: 5px;
 }
 
-menuitem:insensitive {
+menuitem:disabled {
   color: #999999;
   padding: 0px;
   font-size: 0.8rem;

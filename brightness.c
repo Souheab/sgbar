@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "config.h"
+#include "metric.h"
 
 #define BACKLIGHT_PATH "/sys/class/backlight"
 #define BRIGHTNESS_TOOLTIP_FORMAT_STR "Brightness: %d%%"
@@ -135,7 +137,7 @@ static void on_brightness_scale_changed(GtkWidget *widget, gpointer data) {
   set_brightness(brightness);
 }
 
-void init_brightness(GtkWidget *label_widget, GtkWidget *scale_widget,
+static void init_brightness(GtkWidget *label_widget, GtkWidget *scale_widget,
                      GtkWidget *revealer_widget) {
   brightness_scale = scale_widget;
   brightness_label = label_widget;
@@ -165,3 +167,15 @@ void init_brightness(GtkWidget *label_widget, GtkWidget *scale_widget,
   g_signal_connect(brightness_scale, "value-changed",
                    G_CALLBACK(on_brightness_scale_changed), NULL);
 }
+
+
+GtkWidget *brightess_widget_new() {
+  brightness_scale =
+      gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  brightness_revealer = gtk_revealer_new();
+  brightness_label = gtk_label_new(brightnessicon);
+
+  init_brightness(brightness_label, brightness_scale, brightness_revealer);
+
+  return metric_new(brightness_label, brightness_scale, brightness_revealer);
+};

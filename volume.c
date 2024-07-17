@@ -1,16 +1,20 @@
 #include <gtk/gtk.h>
 #include <pulse/glib-mainloop.h>
 #include <pulse/pulseaudio.h>
+#include "config.h"
+#include "metric.h"
 
 #define VOLUME_TOOLTIP_FORMAT_STR "Volume: %d%%"
+
+// TODO: Use a better model to allow creation of multiple widgets for all widgets
 
 static pa_context *context = NULL;
 static pa_glib_mainloop *glib_mainloop = NULL;
 static pa_mainloop_api *mainloop_api = NULL;
 static gboolean volume_changing = FALSE;
 static GtkWidget *volume_scale = NULL;
-static GtkWidget *revealer = NULL;
-static GtkWidget *label = NULL;
+static GtkWidget *volume_revealer = NULL;
+static GtkWidget *volume_label = NULL;
 static guint timeout_id = 0;
 static gboolean first_run = TRUE;
 static int prev_volume = -1;
@@ -20,10 +24,9 @@ static void init_pa();
 gboolean is_volume_changing() { return volume_changing; }
 
 void connect_widgets_pa(GtkWidget *label_arg, GtkWidget *scale_arg, GtkWidget *revealer_arg) {
-  label = label_arg;
+  volume_label = label_arg;
   volume_scale = scale_arg;
-  revealer = revealer_arg;
-  init_pa();
+  volume_revealer = revealer_arg;
 };
 
 static gboolean revealer_unreveal_callback(gpointer data) {
@@ -37,13 +40,13 @@ static void update_volume_scale(pa_volume_t volume) {
   volume_changing = TRUE;
   gtk_range_set_value(GTK_RANGE(volume_scale), volume_percent);
   if (!first_run)
-    gtk_revealer_set_reveal_child(GTK_REVEALER(revealer), TRUE);
+    gtk_revealer_set_reveal_child(GTK_REVEALER(volume_revealer), TRUE);
   if (timeout_id)
     g_source_remove(timeout_id);
-  timeout_id = g_timeout_add(800, revealer_unreveal_callback, revealer);
+  timeout_id = g_timeout_add(800, revealer_unreveal_callback, volume_revealer);
   GString *str = g_string_new(NULL);
   char *tooltip_text = g_strdup_printf(VOLUME_TOOLTIP_FORMAT_STR, volume_percent);
-  gtk_widget_set_tooltip_text(label, tooltip_text);
+  gtk_widget_set_tooltip_text(volume_label, tooltip_text);
   g_free(tooltip_text);
   volume_changing = FALSE;
   first_run = FALSE;
@@ -113,6 +116,15 @@ static void context_state_callback(pa_context *c, void *userdata) {
   }
 }
 
+
+static void on_volume_scale_value_changed(GtkRange *range, gpointer data) {
+  if (is_volume_changing())
+    return;
+
+  gdouble value = gtk_range_get_value(range);
+  set_volume((int)value);
+}
+
 static void init_pa() {
   glib_mainloop = pa_glib_mainloop_new(g_main_context_default());
   mainloop_api = pa_glib_mainloop_get_api(glib_mainloop);
@@ -122,5 +134,11 @@ static void init_pa() {
   pa_context_connect(context, NULL, 0, NULL);
 }
 
-/* GtkWidget *volume_scale_new() { */
-/* } */
+GtkWidget *volume_widget_new() {
+  volume_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
+  volume_revealer = gtk_revealer_new();
+  volume_label = gtk_label_new(volumeicon);
+  init_pa();
+  g_signal_connect(volume_scale, "value-changed", G_CALLBACK(on_volume_scale_value_changed), NULL);
+  return metric_new(volume_label, volume_scale, volume_revealer);
+}

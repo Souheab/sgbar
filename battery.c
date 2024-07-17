@@ -12,7 +12,6 @@ static GFileMonitor *status_monitor;
 static GtkWidget *battery_widget;
 
 static gboolean update_battery_widget() {
-  g_print("update ran");
   char *capacity_contents = NULL, *status_contents = NULL;
   gsize capacity_length, status_length;
   int capacity;
@@ -58,12 +57,7 @@ static gboolean update_battery_widget() {
   return G_SOURCE_CONTINUE;
 }
 
-gboolean testhai() {
-  g_print("testhai\n");
-  return G_SOURCE_CONTINUE;
-}
-
-void init_battery(GtkWidget *battery_widget_arg) {
+static void init_battery(GtkWidget *battery_widget_arg) {
   capacity_file = g_file_new_for_path(BATTERY_CAPACITY_PATH);
   status_file = g_file_new_for_path(BATTERY_STATUS_PATH);
   battery_widget = battery_widget_arg;
@@ -88,10 +82,15 @@ void init_battery(GtkWidget *battery_widget_arg) {
   g_file_load_contents(status_file, NULL, &capacity_contents,
                        &capacity_length, NULL, NULL);
   g_print("capacity_contents: %s\n", capacity_contents);
-  //fallback timeout :|, the monitor doesn't work
-  // TODO IMPORTANT: Fix this
-  // Unfortunately from what i see we can't seem to monitor brightness maybe since it's managed by the kernel
+  // Unfortunately from what i see we can't seem to monitor battery maybe since it's managed by the kernel
+  // TODO: Update, maybe we can acpi to monitor
   guint a = g_timeout_add_seconds(5, (GSourceFunc)update_battery_widget, NULL);
   printf("timeout id: %d\n", a);
     // Handle error
+}
+
+GtkWidget *battery_widget_new() {
+  GtkWidget *battery = gtk_image_new();
+  init_battery(battery);
+  return battery;
 }
