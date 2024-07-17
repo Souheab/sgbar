@@ -4,7 +4,7 @@ CFLAGS = $(shell $(PKGCONFIG) --cflags gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpuls
 LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse libnm) -lpulse-mainloop-glib
 PREFIX = /usr/local
 
-SRC = sgbar.c config.c metric.c widgets.c tags.c x.c volume.c battery.c brightness.c network.c clock.c
+SRC = sgbar.c config.c metric.c tags.c x.c volume.c battery.c brightness.c network.c clock.c
 
 OBJS = $(SRC:.c=.o)
 

@@ -1,8 +1,7 @@
 #include <gtk/gtk.h>
 
-static GtkWidget *clock_widget;
-
-static gboolean update_clock_widget() {
+static gboolean update_clock_widget(gpointer user_data) {
+  GtkWidget *clock_widget = (GtkWidget *) user_data;
   time_t rawtime;
   struct tm *timeinfo;
   char buffer[50];
@@ -19,7 +18,7 @@ static gboolean update_clock_widget() {
 }
 
 GtkWidget *clock_widget_new() {
-  clock_widget = gtk_label_new(NULL);
-  g_timeout_add_seconds(1, (GSourceFunc)update_clock_widget, NULL);
+  GtkWidget *clock_widget = gtk_label_new(NULL);
+  g_timeout_add_seconds(1, (GSourceFunc)update_clock_widget, clock_widget);
   return clock_widget;
 }
