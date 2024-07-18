@@ -170,6 +170,8 @@ GtkWidget *brightness_widget_new() {
   GtkWidget *label = gtk_label_new(brightnessicon);
 
   Metric *metric = metric_new(label, scale, revealer);
+  GtkStyleContext *style = gtk_widget_get_style_context(metric->metric_widget);
+  gtk_style_context_add_class(style, "brightness-controller");
 
   if (!brightness_initialized)
     init_brightness();

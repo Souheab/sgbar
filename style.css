@@ -2,6 +2,10 @@
   all: unset;
 }
 
+separator {
+  background-color: #64648e;
+}
+
 menu {
   background: #3a3a45;
 }
@@ -48,12 +52,7 @@ window {
 }
 
 .metricbox label {
-  font-size: 2.2rem;
-}
-
-.metricbox {
-  padding: 5px;
-  margin: 5px;
+  font-size: 1.75rem;
 }
 
 .metricbox scale trough {
@@ -68,6 +67,10 @@ window {
 .metricbox scale trough highlight {
   background-color: #f2b50c;
   border-radius: 50px;
+}
+
+#clock-widget {
+  margin-right: 10px;
 }
 
 /*# sourceMappingURL=style.css.map */

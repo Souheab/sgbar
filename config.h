@@ -4,9 +4,9 @@
 #include <gtk/gtk.h>
 #define NUMTAGS 9
 static const char *taglabel = "";
-static const char *volumeicon = "";
-static const char *brightnessicon = "";
-//static const char *cssfilepath = "/usr/local/share/sgbar/style.css";
+static const char *volumeicon = "";
+static const char *brightnessicon = "";
+/* static const char *cssfilepath = "/usr/local/share/sgbar/style.css"; */
 static const char *cssfilepath = "./style.css";
-void tagbuttononclick(GtkWidget *button, gpointer data);
+static int separator_spacing = 8;
 #endif

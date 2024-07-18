@@ -6,6 +6,7 @@
 #include "x.h"
 #include "clock.h"
 #include "tags.h"
+#include "seperator.h"
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <gdk/gdkx.h>
@@ -15,6 +16,7 @@
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
   GtkWidget *tags_box;
+  GtkWidget *overlay;
   GtkWidget *main_box;
   GtkWidget *left_box;
   GtkWidget *right_box;
@@ -25,45 +27,65 @@ static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *volume;
   GtkWidget *brightness;
   GtkWidget *battery;
+  GtkWidget *date_widget;
   GtkWidget *clock_widget;
+  GtkWidget *seperator;
 
-  // TODO: Figure out size based on current monitor
-  // Maybe also create window for each monitor
-  int window_width = 1920;
+
+  // TODO: Figure out automatically monitor size
+  gint monitor_width = 1920;
+  gint monitor_height = 1080;
+
+  int window_width = monitor_width - 10;
   int window_height = 40;
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "sgbar");
   gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
   g_signal_connect(window, "realize", G_CALLBACK(setup_x_event_handling), NULL);
-
+  overlay = gtk_overlay_new();
   main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   left_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  right_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  right_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
 
-  gtk_box_pack_start(GTK_BOX(main_box), left_box, TRUE, TRUE, 0);
-  gtk_box_pack_end(GTK_BOX(main_box), right_box, TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(main_box), left_box, FALSE, FALSE, 0);
+  gtk_box_pack_end(GTK_BOX(main_box), right_box, FALSE, FALSE, 0);
 
   tags_box = tags_box_new();
   gtk_box_pack_start(GTK_BOX(left_box), tags_box, TRUE, TRUE, 0);
 
+  date_widget = clock_widget_new(window, "%d of %B %Y");
+  gtk_widget_set_halign(date_widget, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(date_widget, GTK_ALIGN_CENTER);
+
+  clock_widget = clock_widget_new(window, "%H:%M:%S");
+  gtk_widget_set_name(clock_widget, "clock-widget");
+  gtk_box_pack_end(GTK_BOX(right_box), clock_widget, FALSE, TRUE, 0);
+  seperator = separator_new(separator_spacing);
+  gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
+
+
+  battery = battery_widget_new();
+  gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
+  seperator = separator_new(separator_spacing);
+  gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
+
+  wifi_button = wifi_button_new();
+  gtk_box_pack_end(GTK_BOX(right_box), wifi_button, FALSE, TRUE, 0);
+  seperator = separator_new(separator_spacing);
+  gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
+
   volume = volume_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), volume, FALSE, TRUE, 0);
+  seperator = separator_new(separator_spacing);
+  gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
 
   brightness = brightness_widget_new();
   gtk_box_pack_end(GTK_BOX(right_box), brightness, FALSE, TRUE, 0);
 
-  battery = battery_widget_new();
-  gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
-
-  wifi_button = wifi_button_new();
-  gtk_box_pack_end(GTK_BOX(right_box), wifi_button, FALSE, TRUE, 0);
-
-
-  clock_widget = clock_widget_new();
-  gtk_box_pack_end(GTK_BOX(right_box), clock_widget, FALSE, TRUE, 0);
-
-  gtk_container_add(GTK_CONTAINER(window), main_box);
+  gtk_overlay_add_overlay(GTK_OVERLAY(overlay), date_widget);
+  gtk_container_add(GTK_CONTAINER(overlay), main_box);
+  gtk_container_add(GTK_CONTAINER(window), overlay);
 
   gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);
   gtk_widget_show_all(window);
@@ -73,7 +95,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   if (gdk_window != NULL) {
     gdk_window_set_override_redirect(gdk_window, TRUE);
     gdk_window_show(gdk_window);
-    gdk_window_move(gdk_window, 0, 0);
+    gdk_window_move(gdk_window, 5, 1038);
   }
   gtk_widget_show_all(window);
 }

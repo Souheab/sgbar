@@ -152,6 +152,8 @@ GtkWidget *wifi_button_new() {
   }
   client_initialized = TRUE;
   GtkWidget *wifi_button = gtk_button_new();
+  GtkStyleContext *style = gtk_widget_get_style_context(wifi_button);
+  gtk_style_context_add_class(style, "network-indicator");
   update_wifi_button(wifi_button, NULL);
   g_signal_connect(wifi_button, "clicked", G_CALLBACK(wifi_button_on_click), NULL);
   return wifi_button;

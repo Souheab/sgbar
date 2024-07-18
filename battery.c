@@ -12,12 +12,18 @@ static GFileMonitor *status_monitor;
 static gboolean battery_module_initialized = FALSE;
 
 static gboolean update_battery_widget(gpointer data) {
-  GtkWidget *battery_widget = (GtkWidget *) data;
-  char *capacity_contents = NULL, *status_contents = NULL;
+  GtkWidget *battery_box = (GtkWidget *) data;
+
+  GList *children = gtk_container_get_children(GTK_CONTAINER(battery_box));
+
+  GtkWidget *label = GTK_WIDGET(g_list_nth_data(children, 1));
+  GtkWidget *battery_widget = GTK_WIDGET(g_list_nth_data(children, 0));
+
+  gchar *capacity_contents = NULL, *status_contents = NULL;
   gsize capacity_length, status_length;
-  int capacity;
-  char status[20];
-  char buffer[50];
+  gint capacity;
+  gchar status[20];
+  gchar buffer[50];
 
   if (g_file_load_contents(capacity_file, NULL, &capacity_contents,
                            &capacity_length, NULL, NULL)) {
@@ -53,8 +59,12 @@ static gboolean update_battery_widget(gpointer data) {
   gtk_image_set_from_icon_name(GTK_IMAGE(battery_widget), icon_name,
                                GTK_ICON_SIZE_MENU);
 
+  char *label_text = g_strdup_printf("%d%%", capacity);
+  gtk_label_set_text(GTK_LABEL(label), label_text);
+  g_free(label_text);
   char* tooltip_text = g_strdup_printf(BATTERY_TOOLTIP_FORMAT_STR, capacity, status);
   gtk_widget_set_tooltip_text(battery_widget, tooltip_text);
+  g_free(tooltip_text);
   return G_SOURCE_CONTINUE;
 }
 
@@ -85,15 +95,25 @@ static void init_battery() {
 }
 
 GtkWidget *battery_widget_new() {
+  GtkWidget *battery_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   GtkWidget *battery = gtk_image_new();
+  GtkWidget *label = gtk_label_new("");
+  GtkStyleContext *style = gtk_widget_get_style_context(battery);
+  gtk_style_context_add_class(style, "battery-indicator");
+  style = gtk_widget_get_style_context(label);
+  gtk_style_context_add_class(style, "battery-label");
+
   if (!battery_module_initialized)
     init_battery();
 
-  update_battery_widget(battery);
+  gtk_box_pack_start(GTK_BOX(battery_box), battery, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(battery_box), label, FALSE, FALSE, 0);
+
+  update_battery_widget(battery_box);
 
   // Unfortunately from what i see we can't seem to monitor battery maybe since it's managed by the kernel
   // TODO: Update, maybe we can acpi to monitor
-  g_timeout_add_seconds(5, (GSourceFunc)update_battery_widget, battery);
+  g_timeout_add_seconds(5, (GSourceFunc)update_battery_widget, battery_box);
 
-  return battery;
+  return battery_box;
 }
