@@ -36,7 +36,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gint monitor_width = 1920;
   gint monitor_height = 1080;
 
-  int window_width = monitor_width - 10;
+  int window_width = monitor_width - 20;
   int window_height = 40;
 
   window = gtk_application_window_new(app);
@@ -54,7 +54,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
   tags_box = tags_box_new();
   gtk_box_pack_start(GTK_BOX(left_box), tags_box, TRUE, TRUE, 0);
 
-  date_widget = clock_widget_new(window, "%d of %B %Y");
+  // Format string for ordinals is %^, the rest is the same as strftime
+  date_widget = clock_widget_new(window, "%A, %d%^ of %B %Y");
   gtk_widget_set_halign(date_widget, GTK_ALIGN_CENTER);
   gtk_widget_set_valign(date_widget, GTK_ALIGN_CENTER);
 
@@ -95,7 +96,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   if (gdk_window != NULL) {
     gdk_window_set_override_redirect(gdk_window, TRUE);
     gdk_window_show(gdk_window);
-    gdk_window_move(gdk_window, 5, 1038);
+    gdk_window_move(gdk_window, 10, 1030);
   }
   gtk_widget_show_all(window);
 }

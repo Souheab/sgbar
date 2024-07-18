@@ -1,9 +1,11 @@
 #include <gtk/gtk.h>
+#include <string.h>
 
 typedef struct {
   GtkWidget *clock_widget;
   gchar *format_str;
 } ClockUpdateArgs;
+
 
 static void on_clock_button_clicked(GtkWidget *button, gpointer popup) {
   if (gtk_widget_get_visible(popup)) {
@@ -38,6 +40,32 @@ static void on_clock_button_clicked(GtkWidget *button, gpointer popup) {
   }
 }
 
+static void format_ordinal_suffix(gchar* str, gint day) {
+  gchar *pos = strstr(str, "%^");
+  if (pos != NULL) {
+    gchar *suffix;
+    if (day >= 11 && day <= 13) {
+      suffix = "th";
+    } else {
+      switch (day % 10) {
+        case 1:
+          suffix = "st";
+          break;
+        case 2:
+          suffix = "nd";
+          break;
+        case 3:
+          suffix = "rd";
+          break;
+        default:
+          suffix = "th";
+          break;
+      }
+    }
+    memcpy(pos, suffix, 2);
+  }
+}
+
 static gboolean update_clock_widget(gpointer user_data) {
   ClockUpdateArgs *args = (ClockUpdateArgs *)user_data;
   GtkWidget *clock_widget = args->clock_widget;
@@ -50,6 +78,7 @@ static gboolean update_clock_widget(gpointer user_data) {
   timeinfo = localtime(&rawtime);
 
   strftime(buffer, sizeof(buffer), format_str, timeinfo);
+  format_ordinal_suffix(buffer, timeinfo->tm_mday);
   gtk_button_set_label(GTK_BUTTON(clock_widget), buffer);
 
   return G_SOURCE_CONTINUE;
