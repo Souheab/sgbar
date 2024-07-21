@@ -5,7 +5,27 @@
 #include <X11/Xlib.h>
 
 GtkWidget *tagbuttons[NUMTAGS];
+gboolean on_tag_button_left_click(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  if (event->type != GDK_BUTTON_PRESS || event->button != 1)
+    return FALSE;
+  Display *dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+  gint button_number = GPOINTER_TO_INT(data);
+  g_print("butnum %d\n", button_number);
 
+  if (dpy == NULL || tagmask == -1)
+    return FALSE;
+
+  g_print("tagmask: %d\n", tagmask);
+  Window root = DefaultRootWindow(dpy);
+  gint bit_mask = 1 << button_number;
+  gint tagmask_updated = bit_mask;
+  char tagmask_str[32];
+  snprintf(tagmask_str, sizeof(tagmask_str), "%d", tagmask_updated);
+  g_print("tagmask_updated %s \n", tagmask_str);
+  XChangeProperty(dpy, root, dwm_atoms[DwmSetTags], utf8_string, 8, PropModeReplace, (unsigned char *)tagmask_str, strlen(tagmask_str));
+  XFlush(dpy);
+  return TRUE;
+}
 gboolean on_tag_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   if (event->type != GDK_BUTTON_PRESS || event->button != 3)
     return FALSE;
@@ -19,9 +39,9 @@ gboolean on_tag_button_right_click(GtkWidget *widget, GdkEventButton *event, gpo
   g_print("tagmask: %d\n", tagmask);
   Window root = DefaultRootWindow(dpy);
   gint bit_mask = 1 << button_number;
-  tagmask ^= bit_mask;
+  gint tagmask_updated = tagmask ^ bit_mask;
   char tagmask_str[32];
-  snprintf(tagmask_str, sizeof(tagmask_str), "%d", tagmask);
+  snprintf(tagmask_str, sizeof(tagmask_str), "%d", tagmask_updated);
   g_print("tagmask_updated %s \n", tagmask_str);
   XChangeProperty(dpy, root, dwm_atoms[DwmSetTags], utf8_string, 8, PropModeReplace, (unsigned char *)tagmask_str, strlen(tagmask_str));
   XFlush(dpy);
@@ -33,6 +53,7 @@ static GtkWidget *tag_button_new(gint tagnum) {
   GtkStyleContext *stylecontext;
   button = gtk_button_new_with_label(taglabel);
   g_signal_connect(button, "button-press-event", G_CALLBACK(on_tag_button_right_click),  GINT_TO_POINTER(tagnum));
+  g_signal_connect(button, "button-press-event", G_CALLBACK(on_tag_button_left_click),  GINT_TO_POINTER(tagnum));
   stylecontext = gtk_widget_get_style_context(button);
   gtk_style_context_add_class(stylecontext, "tagbutton");
   return button;
