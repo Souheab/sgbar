@@ -21,8 +21,10 @@ static void x_handle_atom(Atom atom) {
                          False, utf8_string, &actual_type, &actual_format,
                          &nitems, &bytes_after, &prop_data) == Success) {
     if (prop_data) {
-      tagmask = atoi((char*)prop_data);
-      g_print("tagmask: %d\n", tagmask);
+      if (atom == dwm_atoms[DwmTags]) {
+        tagmask = atoi((char*)prop_data);
+        g_print("tagmask X: %d\n", tagmask);
+      }
       if (atom == dwm_atoms[DwmOccupiedTags]) {
         g_idle_add((GSourceFunc)update_occupied_tag_buttons, GINT_TO_POINTER(tagmask));
       } else {

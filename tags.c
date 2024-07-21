@@ -6,22 +6,26 @@
 
 GtkWidget *tagbuttons[NUMTAGS];
 
-void on_tag_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+gboolean on_tag_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  if (event->type != GDK_BUTTON_PRESS || event->button != 3)
+    return FALSE;
   Display *dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
   gint button_number = GPOINTER_TO_INT(data);
   g_print("butnum %d\n", button_number);
 
   if (dpy == NULL || tagmask == -1)
-    return;
+    return FALSE;
 
+  g_print("tagmask: %d\n", tagmask);
   Window root = DefaultRootWindow(dpy);
   gint bit_mask = 1 << button_number;
-  tagmask |= bit_mask;
+  tagmask ^= bit_mask;
   char tagmask_str[32];
   snprintf(tagmask_str, sizeof(tagmask_str), "%d", tagmask);
   g_print("tagmask_updated %s \n", tagmask_str);
   XChangeProperty(dpy, root, dwm_atoms[DwmSetTags], utf8_string, 8, PropModeReplace, (unsigned char *)tagmask_str, strlen(tagmask_str));
   XFlush(dpy);
+  return TRUE;
 }
 
 static GtkWidget *tag_button_new(gint tagnum) {
