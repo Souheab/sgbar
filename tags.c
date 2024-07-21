@@ -67,7 +67,7 @@ istagselected(int tagnum, int tagmask) {
   return (tagmask & (1 << tagnum)) != 0;
 }
 
-gboolean update_active_tag_buttons(int tagmask) {
+gboolean update_active_tag_buttons(gint tagmask) {
   for (int i = 0; i < NUMTAGS; i++) {
     GtkWidget *button = tagbuttons[i];
     GtkStyleContext *stylecontext = gtk_widget_get_style_context(button);
@@ -80,9 +80,9 @@ gboolean update_active_tag_buttons(int tagmask) {
   return G_SOURCE_REMOVE;
 }
 
-gboolean update_occupied_tag_buttons(int tagmask) {
-  printf("update_occupied_tag_buttons\n");
-  for (int i = 0; i < NUMTAGS; i++) {
+gboolean update_occupied_tag_buttons(gint tagmask) {
+  g_print("update_occupied_tag_buttons\n");
+  for (gint i = 0; i < NUMTAGS; i++) {
     GtkWidget *button = tagbuttons[i];
     GtkStyleContext *stylecontext = gtk_widget_get_style_context(button);
     if (istagselected(i, tagmask)) {

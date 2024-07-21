@@ -23,12 +23,10 @@ static void x_handle_atom(Atom atom) {
     if (prop_data) {
       if (atom == dwm_atoms[DwmTags]) {
         tagmask = atoi((char*)prop_data);
-        g_print("tagmask X: %d\n", tagmask);
-      }
-      if (atom == dwm_atoms[DwmOccupiedTags]) {
-        g_idle_add((GSourceFunc)update_occupied_tag_buttons, GINT_TO_POINTER(tagmask));
-      } else {
         g_idle_add((GSourceFunc)update_active_tag_buttons, GINT_TO_POINTER(tagmask));
+      } else if (atom == dwm_atoms[DwmOccupiedTags]) {
+        gint occupied_tagmask = atoi((char*)prop_data);
+        g_idle_add((GSourceFunc)update_occupied_tag_buttons, GINT_TO_POINTER(occupied_tagmask));
       }
       XFree(prop_data);
     }
