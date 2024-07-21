@@ -12,6 +12,7 @@
 #include <gdk/gdkx.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
+#include <unistd.h>
 
 static void activate(GtkApplication *app, gpointer user_data) {
   GtkWidget *window;
@@ -113,6 +114,20 @@ int main(int argc, char **argv) {
   if (screen == NULL) {
     g_error("Failed to get screen");
   }
+  char *cssfilepath = NULL;
+  for (int i = 0; i < NUM_CSS_PATHS; i++) {
+    if (access(cssfilepaths[i], F_OK) == 0) {
+      cssfilepath = cssfilepaths[i];
+      break;
+    }
+  }
+
+  if (cssfilepath == NULL) {
+    g_error("Failed to find css file");
+  } else {
+    g_print("Using css file: %s\n", cssfilepath);
+  }
+
   cssfile = g_file_new_for_path(cssfilepath);
   gtk_css_provider_load_from_file(cssprovider, cssfile, NULL);
   gtk_style_context_add_provider_for_screen(screen,

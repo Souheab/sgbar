@@ -51,6 +51,10 @@ window {
   color: #009fff;
 }
 
+.tagbutton-active:hover label {
+  color: #009fff;
+}
+
 .metricbox label {
   font-size: 1.75rem;
 }

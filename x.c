@@ -1,4 +1,5 @@
 #include "tags.h"
+#include "x.h"
 #include <X11/Xatom.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
@@ -6,15 +7,9 @@
 // Contains X11 related functions
 Display *display;
 Window root_window;
-Atom utf8string;
-
-enum {
-  DwmTags,
-  DwmOccupiedTags,
-  DwmLast
-};
-
+Atom utf8_string;
 Atom dwm_atoms[DwmLast];
+gint tagmask;
 
 static void x_handle_atom(Atom atom) {
   Atom actual_type;
@@ -23,10 +18,11 @@ static void x_handle_atom(Atom atom) {
   unsigned char *prop_data = NULL;
 
   if (XGetWindowProperty(display, root_window, atom, 0, LONG_MAX,
-                         False, utf8string, &actual_type, &actual_format,
+                         False, utf8_string, &actual_type, &actual_format,
                          &nitems, &bytes_after, &prop_data) == Success) {
     if (prop_data) {
-      int tagmask = atoi((char*)prop_data);
+      tagmask = atoi((char*)prop_data);
+      g_print("tagmask: %d\n", tagmask);
       if (atom == dwm_atoms[DwmOccupiedTags]) {
         g_idle_add((GSourceFunc)update_occupied_tag_buttons, GINT_TO_POINTER(tagmask));
       } else {
@@ -66,6 +62,7 @@ static GdkFilterReturn x_event_filter(GdkXEvent *xevent, GdkEvent *event,
 }
 
 void setup_x_event_handling(GtkWidget *widget) {
+  tagmask = -1;
   GdkScreen *screen = gtk_widget_get_screen(widget);
   GdkWindow *root_gdk_window = gdk_screen_get_root_window(screen);
 
@@ -78,7 +75,8 @@ void setup_x_event_handling(GtkWidget *widget) {
 
   dwm_atoms[DwmTags] = XInternAtom(display, "DWM_TAG_MASK", False);
   dwm_atoms[DwmOccupiedTags] = XInternAtom(display, "DWM_OCCUPIED_TAG_MASK", False);
-	utf8string = XInternAtom(display, "UTF8_STRING", False);
+  dwm_atoms[DwmSetTags] = XInternAtom(display, "DWM_SET_TAG_MASK", False);
+	utf8_string = XInternAtom(display, "UTF8_STRING", False);
 
   XSelectInput(display, root_window, PropertyChangeMask);
   gdk_window_add_filter(root_gdk_window, x_event_filter, NULL);
