@@ -4,3 +4,4 @@ sgbar
 .cache/
 style.css.map
 *.scss
+*.org
