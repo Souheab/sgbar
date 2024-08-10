@@ -104,7 +104,7 @@ static gboolean revealer_unreveal_callback(gpointer data) {
 
 static void
 update_brightness_widget(Metric *metric) {
-  printf("Updating brightness widget\n");
+  printf("Updating brightness widget:\n Metric pointer %p\n", metric);
   char *contents;
   if (!g_file_load_contents(brightness_file, NULL, &contents, NULL, NULL, NULL)) {
     g_print("Cannot read brightness file\n");
@@ -179,7 +179,7 @@ GtkWidget *brightness_widget_new() {
   update_brightness_widget(metric);
 
   g_signal_connect(brightness_monitor, "changed",
-                   G_CALLBACK(update_brightness_widget), NULL);
+                   G_CALLBACK(on_brightness_file_changed), metric);
   g_signal_connect(metric->scale, "value-changed",
                    G_CALLBACK(on_brightness_scale_changed), NULL);
 
