@@ -1,7 +1,6 @@
 CC ?= gcc
-PKGCONFIG = $(shell which pkg-config)
-CFLAGS = $(shell $(PKGCONFIG) --cflags gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse libnm)
-LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse libnm) -lpulse-mainloop-glib
+CFLAGS = $(shell pkg-config --cflags gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse libnm)
+LIBS = $(shell pkg-config --libs gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse libnm) -lpulse-mainloop-glib
 PREFIX = /usr/local
 
 SRC = sgbar.c metric.c tags.c x.c volume.c battery.c brightness.c network.c clock.c container.c seperator.c
