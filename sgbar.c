@@ -1,4 +1,3 @@
-#include "brightness2.h"
 #include "config.h"
 #include "network.h"
 #include "volume.h"
