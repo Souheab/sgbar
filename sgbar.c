@@ -1,3 +1,4 @@
+#include "brightness2.h"
 #include "config.h"
 #include "network.h"
 #include "volume.h"
@@ -82,7 +83,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
   seperator = separator_new(separator_spacing);
   gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
 
-  brightness = brightness_widget_new();
+  BrightnessController *brightness_controller = get_brightness_controller();
+  brightness = brightness_controller_get_new_view(brightness_controller)->metric_widget;
   gtk_box_pack_end(GTK_BOX(right_box), brightness, FALSE, TRUE, 0);
 
   gtk_overlay_add_overlay(GTK_OVERLAY(overlay), date_widget);
