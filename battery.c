@@ -1,4 +1,4 @@
-#include "battery2.h"
+#include "battery.h"
 #include <gtk/gtk.h>
 
 #define BATTERY_BASE_PATH "/sys/class/power_supply/"

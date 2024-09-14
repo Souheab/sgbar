@@ -3,7 +3,7 @@ CFLAGS = $(shell pkg-config --cflags gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse 
 LIBS = $(shell pkg-config --libs gtk+-3.0 gio-2.0 gio-unix-2.0 x11 libpulse libnm) -lpulse-mainloop-glib
 PREFIX = /usr/local
 
-SRC = sgbar.c metric.c tags.c x.c volume.c battery2.c brightness.c network.c clock.c container.c seperator.c
+SRC = sgbar.c metric.c tags.c x.c volume.c battery.c brightness.c network.c clock.c container.c seperator.c
 
 OBJS = $(SRC:.c=.o)
 

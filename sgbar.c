@@ -1,7 +1,7 @@
 #include "config.h"
 #include "network.h"
 #include "volume.h"
-#include "battery2.h"
+#include "battery.h"
 #include "brightness.h"
 #include "x.h"
 #include "clock.h"
