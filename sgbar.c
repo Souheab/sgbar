@@ -1,7 +1,7 @@
 #include "config.h"
 #include "network.h"
 #include "volume.h"
-#include "battery.h"
+#include "battery2.h"
 #include "brightness.h"
 #include "x.h"
 #include "clock.h"
@@ -67,7 +67,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
 
 
-  battery = battery_widget_new();
+  BatteryController *battery_controller = get_battery_controller();
+  battery = battery_controller_get_new_view(battery_controller)->battery_box;
   gtk_box_pack_end(GTK_BOX(right_box), battery, FALSE, TRUE, 0);
   seperator = separator_new(separator_spacing);
   gtk_box_pack_end(GTK_BOX(right_box), seperator, FALSE, TRUE, 0);
